@@ -1,3 +1,7 @@
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Outfile=RandomWallpaperChanger.exe
+#AutoIt3Wrapper_Res_Description=broodplank.net
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 ; Random Wallpaper from wallhaven.cc
 ; Created by broodplank
 ; Copyright 2014 broodplank.net - All Rights Reserved
