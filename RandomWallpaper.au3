@@ -9,7 +9,7 @@
 
 Opt("TrayAutoPause", 0)
 
-$version = "1.0"
+$version = "1.1"
 
 HotKeySet("^!s", "SaveWallpaper")
 HotKeySet("^!p", "PauseLoop")
@@ -58,6 +58,7 @@ EndFunc   ;==>Quit
 
 Func PauseLoop()
 	TrayTip("Random Wallpaper Changer", "Random wallpaper loop has been paused" & @CRLF & "Press Control+Alt+N to go to the next wallpaper" & @CRLF & "Press Control+Alt+C to continue loop", 5, 1)
+	$continue = 0
 	$pause = 1
 EndFunc   ;==>PauseLoop
 
@@ -65,6 +66,7 @@ EndFunc   ;==>PauseLoop
 Func _ContinueLoop()
 	TrayTip("Random Wallpaper Changer", "Random wallpaper loop has been resumed, press Control+Alt+P to repause loop or press Control+Alt+S to save the current wallpaper", 5, 1)
 	$continue = 1
+	$pause = 0
 EndFunc   ;==>_ContinueLoop
 
 
