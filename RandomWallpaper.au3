@@ -6,10 +6,25 @@
 ; Created by broodplank
 ; Copyright 2014 broodplank.net - All Rights Reserved
 
+#include <Process.au3>
+
 ;Declare
-$version = "1.3"
-$wallapers = 70498
-Local $sleep, $pause, $continue
+$version = "1.4"
+Local $sleep, $pause, $continue, $wallpapers
+
+;Get newest wallpaper id
+$get = InetGet("http://alpha.wallhaven.cc/latest", @ScriptDir&"\latest.html")
+If $get = @error Then
+	MsgBox(64, "Random Wallpaper Changer", "Something went wrong, are you connected to the internet?")
+	Exit
+Else
+	$search = _StringSearchInFile(@ScriptDir&"\latest.html", "data-src")
+	$readline = FileReadLine(@TempDir & "\results.txt", 3)
+	$wallpapers = StringMid($readline, 80, 5)
+	TrayTip("Random Wallpaper Changer", $wallpapers&" found in wallhaven database", 1, 1)
+	FileDelete(@ScriptDir&"\latest.html")
+EndIf
+
 
 ;I use my own pause
 Opt("TrayAutoPause", 0)
@@ -25,12 +40,12 @@ HotKeySet("^!x", "Quit")
 ;Check if wallhaven.cc is up
 Ping("www.wallhaven.cc")
 If @error Then
-	TrayTip("Random Wallpaper Changer", "There is a connection issue!"&@CRLF&@CRLF&"Possible Reasons:"&@CRLF&"1. You are not connected to the internet"&@CRLF&"2. Wallhaven.cc is down"&@CRLF&"3. Your firewall is blocking this application", 8, 3)
-	sleep(5000)
+	TrayTip("Random Wallpaper Changer", "There is a connection issue!" & @CRLF & @CRLF & "Possible Reasons:" & @CRLF & "1. You are not connected to the internet" & @CRLF & "2. Wallhaven.cc is down" & @CRLF & "3. Your firewall is blocking this application", 8, 3)
+	Sleep(5000)
 	TrayTip("Random Wallpaper Changer", "Exiting...", 2, 3)
-	sleep(1000)
-	exit
-Endif
+	Sleep(1000)
+	Exit
+EndIf
 
 ;Show hotkeys
 MsgBox(0, "Random Wallpaper Changer", "Hotkeys:" & @CRLF & @CRLF & "- Save Wallpaper:   Control+Alt+S" & @CRLF & "- Set Interval:          Control+Alt+I" & @CRLF & "- Pause Loop:         Control+Alt+P" & @CRLF & "- Next Wallpaper:   Control+Alt+N   (for in pause mode)" & @CRLF & "- Continue Loop:   Control+Alt+C" & @CRLF & "- Exit Application:  Control+Alt+X" & @CRLF & @CRLF & "Version: " & $version & @CRLF & "Created by broodplank, visit at broodplank.net")
@@ -41,14 +56,6 @@ TrayTip("Random Wallpaper Changer", "Random wallpaper loop has been started" & @
 ;Start loop
 While 1
 
-	;make sure sleep is never undeclared
-	If $sleep = "" Or $sleep = 0 Then $sleep = 10
-	$ran = Random(1, $wallapers, 1)
-	InetGet("http://alpha.wallhaven.cc/wallpapers/full/wallhaven-" & $ran & ".jpg", @ScriptDir & "/" & $ran & ".jpg")
-	ChangeDesktopWallpaper(@ScriptDir & "/" & $ran & ".jpg")
-	FileDelete(@ScriptDir & "/" & $ran & ".jpg")
-	Sleep($sleep * 1000)
-
 	;Monitor for pause var
 	If $pause = 1 Then
 		While 1
@@ -56,13 +63,20 @@ While 1
 			Sleep(20)
 		WEnd
 	EndIf
+	;make sure sleep is never undeclared
+	If $sleep = "" Or $sleep = 0 Then $sleep = 10
+	$ran = Random(1, $wallpapers, 1)
+	InetGet("http://alpha.wallhaven.cc/wallpapers/full/wallhaven-" & $ran & ".jpg", @ScriptDir & "/" & $ran & ".jpg")
+	ChangeDesktopWallpaper(@ScriptDir & "/" & $ran & ".jpg")
+	FileDelete(@ScriptDir & "/" & $ran & ".jpg")
+	Sleep($sleep * 1000)
 
 WEnd
 
 ;Manually set next random wallpaper (should be used in pause mode)
 Func NextWallpaper()
 	If $sleep = "" Or $sleep = 0 Then $sleep = 10
-	$ran = Random(1, $wallapers, 1)
+	$ran = Random(1, $wallpapers, 1)
 	InetGet("http://alpha.wallhaven.cc/wallpapers/full/wallhaven-" & $ran & ".jpg", @ScriptDir & "/" & $ran & ".jpg")
 	ChangeDesktopWallpaper(@ScriptDir & "/" & $ran & ".jpg")
 	FileDelete(@ScriptDir & "/" & $ran & ".jpg")
@@ -139,3 +153,9 @@ Func ChangeDesktopWallpaper($bmp)
 
 	Return 0
 EndFunc   ;==>ChangeDesktopWallpaper
+
+Func _StringSearchInFile($file, $qry)
+	FileDelete(@TempDir & "\results.txt")
+	_RunDOS("find /n /i """&$qry&""" "&$file& " >> " &@TempDir&"\results.txt")
+	Return FileRead(@TempDir & "\results.txt", FileGetSize(@TempDir & "\results.txt"))
+EndFunc   ;==>_StringSearchInFile
